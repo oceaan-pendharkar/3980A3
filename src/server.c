@@ -294,16 +294,18 @@ int process_clients_with_fork(server_data_t *data)
         exit_flag = -3;
         goto done;
     }
-    printf("forking...\n");
-    pid = fork();
-    if(pid == -1)
-    {
-        perror("fork failed");
-        exit_flag = EXIT_FAILURE;
-        return exit_flag;
-    }
+
     while(!exit_flag)
     {
+        printf("forking...\n");
+        pid = fork();
+        if(pid == -1)
+        {
+            perror("fork failed");
+            exit_flag = EXIT_FAILURE;
+            goto done;
+        }
+
         if(pid == 0)
         {
             int client_fd = accept(data->network_socket_fd, NULL, 0);
