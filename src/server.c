@@ -235,7 +235,6 @@ int parse_server_arguments(int argc, char *args[], server_data_t *data)
                 break;
             case 'p':
                 data->port_number = convert_port(optarg, &exit_flag);
-                printf("port number set to %d\n", data->port_number);
                 break;
             default:
                 fprintf(stderr, "Usage: %s -a <ip address> -p <port number>\n", arguments[0]);
