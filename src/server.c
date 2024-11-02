@@ -147,7 +147,6 @@ int process_client(int fd)
     char                   *input;
     ssize_t                 n_read;
     ssize_t                 n_wrote = -1;
-    printf("processing client!!\n");
     if(fd < 0)
     {
         printf("Error opening network socket\n");
@@ -297,6 +296,13 @@ int process_clients_with_fork(server_data_t *data)
 
     while(!exit_flag)
     {
+        int client_fd = accept(data->network_socket_fd, NULL, 0);
+        if(client_fd == -1)
+        {
+            printf("accept failed!\n");
+            exit_flag = errno;
+            goto done;
+        }
         printf("forking...\n");
         pid = fork();
         if(pid == -1)
@@ -308,13 +314,6 @@ int process_clients_with_fork(server_data_t *data)
 
         if(pid == 0)
         {
-            int client_fd = accept(data->network_socket_fd, NULL, 0);
-            if(client_fd == -1)
-            {
-                printf("accept failed!\n");
-                exit_flag = errno;
-                goto done;
-            }
             printf("processing client...\n");
             exit_flag = process_client(client_fd);
             printf("processed child...\n");
