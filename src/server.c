@@ -249,7 +249,7 @@ int parse_server_arguments(int argc, char *args[], server_data_t *data)
         }
         if(data->port_number == 0)
         {
-            printf("You must specify an ip address and port number between 1-655535.\n");
+            printf("You must specify an ip address and port number between 1-65535.\n");
         }
         fprintf(stderr, "Usage: %s -a <ip address> -p <port number>\n", arguments[0]);
         return -1;
