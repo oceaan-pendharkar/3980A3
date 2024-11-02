@@ -2,9 +2,9 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <netinet/in.h>
 #include <signal.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 
 typedef struct
 {

@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,13 +16,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdint.h>
 
 #define ERR_NONE 0
 #define ERR_NO_DIGITS 1
 #define ERR_OUT_OF_RANGE 2
 #define ERR_INVALID_CHARS 3
-#define PORT 8080
 #define BACKLOG 5
 
 static volatile sig_atomic_t exit_flag = 0;    // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
@@ -226,7 +225,7 @@ int parse_server_arguments(int argc, char *args[], server_data_t *data)
     const bool   HAS_ADDRESS = arguments[1] != (void *)0 && strcmp(arguments[1], arg1) == 0;
     const bool   HAS_PORT    = arguments[3] != (void *)0 && strcmp(arguments[3], arg2) == 0;
     data->ip_address         = "asdfasf";
-    data->port_number        = PORT;
+    data->port_number        = 0;
     while((opt = getopt(argc, arguments, "a:p:")) != -1)
     {
         switch(opt)
@@ -242,11 +241,15 @@ int parse_server_arguments(int argc, char *args[], server_data_t *data)
                 return -1;
         }
     }
-    if(argc < NUM_ARGS || !HAS_ADDRESS || !HAS_PORT)
+    if(argc < NUM_ARGS || !HAS_ADDRESS || !HAS_PORT || data->port_number == 0)
     {
         if(!HAS_ADDRESS || !HAS_PORT)
         {
             printf("You must specify an ip address and port number for your server.\n");
+        }
+        if(data->port_number == 0)
+        {
+            printf("You must specify an ip address and port number between 1-655535.\n");
         }
         fprintf(stderr, "Usage: %s -a <ip address> -p <port number>\n", arguments[0]);
         return -1;
@@ -288,8 +291,8 @@ int process_clients_with_fork(server_data_t *data)
     if(data->network_socket_fd == -1)
     {
         perror("opening network socket failed");
-        data->network_socket_fd = -1;
-        return -3;
+        exit_flag = -3;
+        goto done;
     }
     printf("forking...\n");
     pid = fork();
@@ -308,9 +311,7 @@ int process_clients_with_fork(server_data_t *data)
             {
                 printf("accept failed!\n");
                 exit_flag = errno;
-                close(data->network_socket_fd);
-                printf("closed network socket\n");
-                return exit_flag;
+                goto done;
             }
             printf("processing client...\n");
             exit_flag = process_client(client_fd);
@@ -318,7 +319,9 @@ int process_clients_with_fork(server_data_t *data)
             close(client_fd);
         }
     }
+done:
     close(data->network_socket_fd);
+    printf("closed network socket\n");
     return exit_flag;
 }
 

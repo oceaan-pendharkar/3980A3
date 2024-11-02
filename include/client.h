@@ -4,8 +4,8 @@
 
 #ifndef CLIENT_H
 #define CLIENT_H
-#include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 typedef struct
 {
