@@ -64,7 +64,6 @@ void write_string_to_fd(char *input, const int *fd, int *err)
     {
         *err = -4;
     }
-    //    close(*fd);
     free(input);
 }
 

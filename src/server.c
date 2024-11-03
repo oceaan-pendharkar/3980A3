@@ -147,11 +147,6 @@ int process_client(int fd)
     char                   *input;
     ssize_t                 n_read;
     ssize_t                 n_wrote = -1;
-    if(fd < 0)
-    {
-        printf("Error opening network socket\n");
-        return -3;
-    }
 
     input = (char *)malloc(LIMIT * sizeof(char));
     if(input == NULL)
