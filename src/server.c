@@ -27,7 +27,7 @@ static volatile sig_atomic_t exit_flag = 0;    // NOLINT(cppcoreguidelines-avoid
 
 static int socket_bind_listen(const struct sockaddr_storage *addr, socklen_t addr_len, int backlog, volatile sig_atomic_t *err);
 
-int open_network_socket_server(const char *address, in_port_t port, int backlog, volatile sig_atomic_t *err)
+int open_network_socket_server(const char *address, in_port_t port, int backlog, int *err)
 {
     struct sockaddr_storage addr;
     socklen_t               addr_len;
@@ -82,7 +82,7 @@ static int socket_bind_listen(const struct sockaddr_storage *addr, socklen_t add
     return server_fd;
 }
 
-void setup_network_address(struct sockaddr_storage *addr, socklen_t *addr_len, const char *address, in_port_t port, volatile sig_atomic_t *err)
+void setup_network_address(struct sockaddr_storage *addr, socklen_t *addr_len, const char *address, in_port_t port, int *err)
 {
     in_port_t net_port;
 
@@ -210,7 +210,7 @@ int process_client(int fd)
     return ret_val;
 }
 
-int parse_server_arguments(int argc, char *args[], server_data_t *data)
+int parse_server_arguments(int argc, char *args[], server_data_t *data, int *err)
 {
     int          opt;
     char *const *arguments   = args;
@@ -229,7 +229,7 @@ int parse_server_arguments(int argc, char *args[], server_data_t *data)
                 data->ip_address = optarg;
                 break;
             case 'p':
-                data->port_number = convert_port(optarg, &exit_flag);
+                data->port_number = convert_port(optarg, err);
                 break;
             default:
                 fprintf(stderr, "Usage: %s -a <ip address> -p <port number>\n", arguments[0]);
@@ -283,7 +283,7 @@ int process_clients_with_fork(server_data_t *data)
 {
     pid_t pid;
     int   ret_val           = 0;
-    data->network_socket_fd = open_network_socket_server(data->ip_address, data->port_number, BACKLOG, &exit_flag);
+    data->network_socket_fd = open_network_socket_server(data->ip_address, data->port_number, BACKLOG, &ret_val);
     if(data->network_socket_fd == -1)
     {
         perror("opening network socket failed");
@@ -323,7 +323,7 @@ done:
     return ret_val;
 }
 
-in_port_t convert_port(const char *str, volatile sig_atomic_t *err)
+in_port_t convert_port(const char *str, int *err)
 {
     in_port_t port;
     char     *endptr;
@@ -368,6 +368,7 @@ done:
 //-4: read/write failed
 int main(int argc, char *argv[])
 {
+    int            err  = 0;
     server_data_t *data = (server_data_t *)malloc(sizeof(server_data_t));
     if(data == NULL)
     {
@@ -376,7 +377,7 @@ int main(int argc, char *argv[])
     }
 
     setup_signal_handler();
-    exit_flag = parse_server_arguments(argc, argv, data);
+    exit_flag = parse_server_arguments(argc, argv, data, &err);
     if(exit_flag == -1)
     {
         free(data);

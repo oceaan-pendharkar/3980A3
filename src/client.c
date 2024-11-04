@@ -181,7 +181,7 @@ void receive_server_response(Client_Settings *settings)
     read_string_from_fd(strlen(settings->message), &settings->fd, &settings->exit_flag);
 }
 
-in_port_t convert_port(const char *str, volatile sig_atomic_t *err)
+in_port_t convert_port(const char *str, int *err)
 {
     in_port_t port;
     char     *endptr;
@@ -219,7 +219,7 @@ done:
     return port;
 }
 
-void setup_network_address(struct sockaddr_storage *addr, socklen_t *addr_len, const char *address, in_port_t port, volatile sig_atomic_t *err)
+void setup_network_address(struct sockaddr_storage *addr, socklen_t *addr_len, const char *address, in_port_t port, int *err)
 {
     in_port_t net_port;
 
