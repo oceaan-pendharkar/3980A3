@@ -25,7 +25,7 @@
 
 static volatile sig_atomic_t exit_flag = 0;    // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
-static int socket_bind_listen(const struct sockaddr_storage *addr, socklen_t addr_len, int backlog, volatile sig_atomic_t *err);
+static int socket_bind_listen(const struct sockaddr_storage *addr, socklen_t addr_len, int backlog, int *err);
 
 int open_network_socket_server(const char *address, in_port_t port, int backlog, int *err)
 {
@@ -48,7 +48,7 @@ done:
     return client_fd;
 }
 
-static int socket_bind_listen(const struct sockaddr_storage *addr, socklen_t addr_len, int backlog, volatile sig_atomic_t *err)
+static int socket_bind_listen(const struct sockaddr_storage *addr, socklen_t addr_len, int backlog, int *err)
 {
     int server_fd;
     int result;
