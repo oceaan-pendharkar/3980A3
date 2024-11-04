@@ -146,6 +146,7 @@ int process_client(int fd)
     char                   *output;
     char                   *input;
     ssize_t                 n_read;
+    int                     ret_val = 0;
     ssize_t                 n_wrote = -1;
 
     input = (char *)malloc(LIMIT * sizeof(char));
@@ -201,12 +202,12 @@ int process_client(int fd)
     if(!n_wrote || n_wrote < 0)
     {
         printf("writing failed\n");
-        exit_flag = -4;
+        ret_val = -4;
     }
 
     free(output);
     free(input);
-    return exit_flag;
+    return ret_val;
 }
 
 int parse_server_arguments(int argc, char *args[], server_data_t *data)
@@ -281,6 +282,7 @@ static void setup_signal_handler(void)
 int process_clients_with_fork(server_data_t *data)
 {
     pid_t pid;
+    int   ret_val           = 0;
     data->network_socket_fd = open_network_socket_server(data->ip_address, data->port_number, BACKLOG, &exit_flag);
     if(data->network_socket_fd == -1)
     {
@@ -318,7 +320,7 @@ int process_clients_with_fork(server_data_t *data)
 done:
     close(data->network_socket_fd);
     printf("closed network socket\n");
-    return exit_flag;
+    return ret_val;
 }
 
 in_port_t convert_port(const char *str, volatile sig_atomic_t *err)
